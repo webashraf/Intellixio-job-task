@@ -1,16 +1,20 @@
 "use client";
 
-import React, { useState, useCallback } from "react";
-import { Product } from "@/types";
-import { ProductModal } from "@/views/products/productModal/productModal";
 import { BackToHome } from "@/components/backToHome/backToHome";
-import { ProductList } from "@/views/products/productList/productList";
-import { PaginationControls } from "@/views/products/paginationControls/paginationControls";
-import { usePagination } from "@/hooks/usePagination";
 import { PRODUCTS_DATA } from "@/data/productsData";
+import { usePagination } from "@/hooks/usePagination";
+import { Product } from "@/types";
+import { PaginationControls } from "@/views/products/paginationControls/paginationControls";
+import { ProductList } from "@/views/products/productList/productList";
+import { ProductModal } from "@/views/products/productModal/productModal";
+import { useRouter, useSearchParams } from "next/navigation";
+import React, { useCallback, useEffect, useState } from "react";
 
 export const Products: React.FC = () => {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+
   const {
     currentPage,
     totalPages,
@@ -18,13 +22,27 @@ export const Products: React.FC = () => {
     handlePageChange,
   } = usePagination({ items: PRODUCTS_DATA, itemsPerPage: 5 });
 
-  const handleOpenModal = useCallback((product: Product) => {
-    setSelectedProduct(product);
-  }, []);
+  
+  useEffect(() => {
+    const productId = searchParams.get("product");
+    if (productId) {
+      const product = PRODUCTS_DATA.find((item) => item.id === productId);
+      if (product) setSelectedProduct(product);
+    }
+  }, [searchParams]);
+
+  const handleOpenModal = useCallback(
+    (product: Product) => {
+      setSelectedProduct(product);
+      router.push(`?product=${product.id}`); 
+    },
+    [router]
+  );
 
   const handleCloseModal = useCallback(() => {
     setSelectedProduct(null);
-  }, []);
+    router.push(""); 
+  }, [router]);
 
   return (
     <div>
