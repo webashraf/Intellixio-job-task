@@ -8,9 +8,9 @@ import { PaginationControls } from "@/views/products/paginationControls/paginati
 import { ProductList } from "@/views/products/productList/productList";
 import { ProductModal } from "@/views/products/productModal/productModal";
 import { useRouter, useSearchParams } from "next/navigation";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { Suspense, useCallback, useEffect, useState } from "react";
 
-export const Products: React.FC = () => {
+const ProductsComponent: React.FC = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
@@ -22,7 +22,6 @@ export const Products: React.FC = () => {
     handlePageChange,
   } = usePagination({ items: PRODUCTS_DATA, itemsPerPage: 5 });
 
-  
   useEffect(() => {
     const productId = searchParams.get("product");
     if (productId) {
@@ -34,14 +33,14 @@ export const Products: React.FC = () => {
   const handleOpenModal = useCallback(
     (product: Product) => {
       setSelectedProduct(product);
-      router.push(`?product=${product.id}`); 
+      router.push(`?product=${product.id}`);
     },
     [router]
   );
 
   const handleCloseModal = useCallback(() => {
     setSelectedProduct(null);
-    router.push(""); 
+    router.push("");
   }, [router]);
 
   return (
@@ -58,5 +57,13 @@ export const Products: React.FC = () => {
         <ProductModal product={selectedProduct} onClose={handleCloseModal} />
       )}
     </div>
+  );
+};
+
+export const Products: React.FC = () => {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <ProductsComponent />
+    </Suspense>
   );
 };
